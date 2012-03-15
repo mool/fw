@@ -1,0 +1,15 @@
+firewall.sh
+
+Es un script de firewall y ruteo bastante sencillo. Solo hay que configurar algunas variables dentro del script, ubicarlo en /etc/init.d y crear los links simbolicos necesarios para que se ejecute al arrancar la maquina.
+
+Los parametros que hay que configurar son:
+# Configuracion Internet
+INET_IF="eth0" # La interface donde esta la conexion a Internet
+INET_TCP_PORTS="22 80 443 10050" # Los puertos TCP que queremos habilitar
+INET_UDP_PORTS="123" # Los puertos UDP que queremos habilitar
+PORT_FORWARDING="" # Formato: ExtPort:IntIP:IntPort:Protocol Ej: "2200:192.168.10.10:22:tcp 80:192.168.10.2:80:tcp"
+
+# Configuracion LAN
+LAN_IF="eth1" # La interface conectada a la red local
+LAN_NET="192.168.10.0/24" # Red local
+PROXY="192.168.10.1:3128" # La IP y puerto del proxy transparente, en caso de no tener ninguno comentar la linea
