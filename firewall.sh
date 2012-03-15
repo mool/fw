@@ -2,7 +2,7 @@
 
 # Configuracion Internet
 INET_IF="eth0"
-INET_TCP_PORTS="22 80 443"
+INET_TCP_PORTS="22 80 443 10050"
 INET_UDP_PORTS="123"
 PORT_FORWARDING="" # Formato: ExtPort:IntIP:IntPort:Protocol
 
@@ -12,18 +12,17 @@ LAN_NET="192.168.10.0/24"
 PROXY="192.168.10.1:3128"
 
 IPTABLES=$(which iptables)
+MODPROBE=$(which modprobe)
+MODULES="ip_tables ip_conntrack ip_conntrack_ftp ip_conntrack_irc iptable_nat ip_nat_ftp"
 
 case "$1" in
 	start)
-    # Cargamos los modulos necesarios
     echo "Setting firewall rules..."
+    # Cargamos los modulos necesarios
     echo -n " * Loading kernel modules: "
-    /sbin/modprobe ip_tables
-    /sbin/modprobe ip_conntrack
-    /sbin/modprobe ip_conntrack_ftp
-    /sbin/modprobe ip_conntrack_irc
-    /sbin/modprobe iptable_nat
-    /sbin/modprobe ip_nat_ftp
+    for module in $MODULES; do
+      $MODPROBE $module
+    done
     echo "done"
     
     # Activamos el IP forwarding
@@ -49,9 +48,14 @@ case "$1" in
     for port in $INET_UDP_PORTS; do
       $IPTABLES -A INPUT -i $INET_IF --proto udp --dport $port -j ACCEPT
     done
+    $IPTABLES -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+    # Acepto VPN y LAN
+    $IPTABLES -A INPUT -i $LAN_IF -j ACCEPT
+    $IPTABLES -A INPUT -i tun+ -j ACCEPT
+    # Acepto ICMP
+    $IPTABLES -A INPUT -p icmp -j ACCEPT
     # No permito conexiones a los demas puertos desde inet
-    $IPTABLES -A INPUT -i $INET_IF --proto udp --dport 1:1024 -j DROP
-    $IPTABLES -A INPUT -i $INET_IF --proto tcp --dport 1:1024 -j DROP
+    $IPTABLES -A INPUT -j REJECT
     echo "done"
     
     echo -n " * Activating Port Forwarding: "
