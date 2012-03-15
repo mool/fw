@@ -43,10 +43,10 @@ case "$1" in
     # Ponemos que tipo de conexiones que vengan de inet aceptamos
     echo -n " * Setting firewall port rules: "
     for port in $INET_TCP_PORTS; do
-      $IPTABLES -A INPUT -i $INET_IF --proto tcp --dport $port -j ACCEPT
+      $IPTABLES -A INPUT -i $INET_IF -p tcp --dport $port -j ACCEPT
     done
     for port in $INET_UDP_PORTS; do
-      $IPTABLES -A INPUT -i $INET_IF --proto udp --dport $port -j ACCEPT
+      $IPTABLES -A INPUT -i $INET_IF -p udp --dport $port -j ACCEPT
     done
     $IPTABLES -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
     # Acepto VPN y LAN
@@ -66,7 +66,7 @@ case "$1" in
         intport=$(echo $i | awk -F ':' '{ print $3 }')
         proto=$(echo $i | awk -F ':' '{ print $4 }')
     
-        $IPTABLES -t nat -A PREROUTING -p $proto --in-interface $INET_IF --dport $extport -j DNAT --to $intip:$intport
+        $IPTABLES -t nat -A PREROUTING -p $proto -i $INET_IF --dport $extport -j DNAT --to $intip:$intport
       done
     fi
     echo "done"
@@ -80,7 +80,7 @@ case "$1" in
     
     if [[ -n "$PROXY" ]]; then
       echo -n " * Activating Transparent Proxy: "
-      $IPTABLES -t nat -A PREROUTING --in-interface $LAN_IF ! -d $LAN_NET -p tcp -m tcp --dport 80 -j DNAT --to-destination $PROXY
+      $IPTABLES -t nat -A PREROUTING -i $LAN_IF ! -d $LAN_NET -p tcp -m tcp --dport 80 -j DNAT --to-destination $PROXY
       echo "done"
     fi
     
