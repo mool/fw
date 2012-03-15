@@ -50,8 +50,8 @@ case "$1" in
       $IPTABLES -A INPUT -i $INET_IF --proto udp --dport $port -j ACCEPT
     done
     # No permito conexiones a los demas puertos desde inet
-    $IPTABLES -A INPUT -i $IF_INET --proto udp --dport 1:1024 -j DROP
-    $IPTABLES -A INPUT -i $IF_INET --proto tcp --dport 1:1024 -j DROP
+    $IPTABLES -A INPUT -i $INET_IF --proto udp --dport 1:1024 -j DROP
+    $IPTABLES -A INPUT -i $INET_IF --proto tcp --dport 1:1024 -j DROP
     echo "done"
     
     echo -n " * Activating Port Forwarding: "
