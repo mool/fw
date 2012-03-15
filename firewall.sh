@@ -4,7 +4,7 @@
 INET_IF="eth0"
 INET_TCP_PORTS="22 80 443"
 INET_UDP_PORTS="123"
-PORT_FORWARDING="" # Formato: ExtPort:IntIP:IntPort
+PORT_FORWARDING="" # Formato: ExtPort:IntIP:IntPort:Protocol
 
 # Configuracion LAN
 LAN_IF="eth1"
@@ -60,8 +60,9 @@ case "$1" in
         extport=$(echo $i | awk -F ':' '{ print $1 }')
         intip=$(echo $i | awk -F ':' '{ print $2 }')
         intport=$(echo $i | awk -F ':' '{ print $3 }')
+        proto=$(echo $i | awk -F ':' '{ print $4 }')
     
-        $IPTABLES -t nat -A PREROUTING -p tcp --in-interface $INET_IF --dport $extport -j DNAT --to $intip:$intport
+        $IPTABLES -t nat -A PREROUTING -p $proto --in-interface $INET_IF --dport $extport -j DNAT --to $intip:$intport
       done
     fi
     echo "done"
