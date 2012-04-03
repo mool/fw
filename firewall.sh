@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CONF_FILE="/etc/firewall.conf"
+
 # Configuracion Internet
 INET_IF="eth0"
 INET_TCP_PORTS="22 80 443 10050"
@@ -10,6 +12,8 @@ PORT_FORWARDING="" # Formato: ExtPort:IntIP:IntPort:Protocol
 LAN_IF="eth1"
 LAN_NET="192.168.10.0/24"
 PROXY="192.168.10.1:3128"
+
+[ -f $CONF_FILE ] && source $CONF_FILE
 
 IPTABLES=$(which iptables)
 MODPROBE=$(which modprobe)
@@ -51,6 +55,7 @@ case "$1" in
     $IPTABLES -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
     # Acepto VPN y LAN
     $IPTABLES -A INPUT -i $LAN_IF -j ACCEPT
+    $IPTABLES -A INPUT -i lo -j ACCEPT
     $IPTABLES -A INPUT -i tun+ -j ACCEPT
     # Acepto ICMP
     $IPTABLES -A INPUT -p icmp -j ACCEPT
